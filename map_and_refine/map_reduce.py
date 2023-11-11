@@ -113,7 +113,7 @@ llm = ChatOpenAI(
 summarizer = MapTextSummarizer(llm=llm, model_name=model_name)
 
 # The text to be summarized is passed here
-file_path = 'Frankenstein.txt'
+file_path = 'Gatsby.txt'
 
 # Open the text file and read its content into a string variable
 with open(file_path, 'r', encoding='utf-8') as file:
