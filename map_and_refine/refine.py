@@ -1,6 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.callbacks import get_openai_callback

@@ -9,6 +9,7 @@ import tiktoken
 import os
 
 # TODO: Import this from other file, I was getting an error when I tried to import it
+# TODO: Figure out why this method uses 5x as many tokens as just refine
 class TextRefiner:
     def __init__(self, llm, model_name):
         self.llm = llm
