@@ -101,27 +101,27 @@ class MapTextSummarizer:
             file.write(text)
         print(f"Saved iteration {iteration} to file")
 
+if __name__ == '__main__':
+    model_name = "gpt-3.5-turbo"
 
-model_name = "gpt-3.5-turbo"
+    # Create an instance of the ChatOpenAI
+    llm = ChatOpenAI(
+        temperature=0,
+        openai_api_key="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",
+        model_name=model_name
+    )
 
-# Create an instance of the ChatOpenAI
-llm = ChatOpenAI(
-    temperature=0,
-    openai_api_key="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",
-    model_name=model_name
-)
+    # Initialize the TextSummarizer with the llm instance
+    summarizer = MapTextSummarizer(llm=llm, model_name=model_name)
 
-# Initialize the TextSummarizer with the llm instance
-summarizer = MapTextSummarizer(llm=llm, model_name=model_name)
+    # The text to be summarized is passed here
+    file_path = 'Gatsby.txt'
 
-# The text to be summarized is passed here
-file_path = 'Gatsby.txt'
+    # Open the text file and read its content into a string variable
+    with open(file_path, 'r', encoding='utf-8') as file:
+        book_text = file.read()
 
-# Open the text file and read its content into a string variable
-with open(file_path, 'r', encoding='utf-8') as file:
-    book_text = file.read()
-
-# Call the process method with the text
-summary, total_tokens_used = summarizer.process(book_text)
-print(summary)
-print(f"Total tokens used: {total_tokens_used}")
+    # Call the process method with the text
+    summary, total_tokens_used = summarizer.process(book_text)
+    print(summary)
+    print(f"Total tokens used: {total_tokens_used}")

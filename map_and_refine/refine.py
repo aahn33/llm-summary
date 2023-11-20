@@ -72,16 +72,16 @@ class TextRefiner:
         with open(os.path.join(directory, filename), 'w', encoding='utf-8') as file:
             file.write(text)
 
+if __name__ == '__main__':
+    # Usage of the TextRefiner class
+    model_name = "gpt-3.5-turbo"
+    llm = ChatOpenAI(temperature=0, openai_api_key="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", model_name=model_name)
+    refiner = TextRefiner(llm, model_name)
 
-# Usage of the TextRefiner class
-model_name = "gpt-3.5-turbo"
-llm = ChatOpenAI(temperature=0, openai_api_key="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", model_name=model_name)
-refiner = TextRefiner(llm, model_name)
+    file_path = 'Gatsby.txt'
+    with open(file_path, 'r', encoding='utf-8') as file:
+        book_text = file.read()
 
-file_path = 'Gatsby.txt'
-with open(file_path, 'r', encoding='utf-8') as file:
-    book_text = file.read()
-
-summary, total_tokens = refiner.refine(book_text)
-print(f"Total tokens: {total_tokens}")
-print(summary)
+    summary, total_tokens = refiner.refine(book_text)
+    print(f"Total tokens: {total_tokens}")
+    print(summary)
