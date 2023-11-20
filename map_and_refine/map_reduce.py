@@ -44,7 +44,7 @@ class MapTextSummarizer:
     def summarize_text(self, text):
         # Split text into chunks
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=3500, chunk_overlap=0
+            chunk_size=3500, chunk_overlap=0, separator='\n'
         )
         texts = text_splitter.split_text(text)
         self.save_to_file("\n-------------------------------------------------------\n".join(texts), "chunks",self.recursive_calls)
@@ -73,21 +73,22 @@ class MapTextSummarizer:
             self.total_tokens_used += cb.total_tokens
         return final_summary
 
-    def process(self, text):
+
+    def process(self, text, fname):
         to_be_summarized = text
         iteration = 0
         while len(self.encoding.encode(to_be_summarized)) > 4000:
             print("Performing the map step")
             # Before summarizing, save the current state of 'to_be_summarized' to a file
-            self.save_to_file(to_be_summarized, "summary",iteration)
+            self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
             to_be_summarized = self.summarize_text(to_be_summarized)
             self.recursive_calls += 1
             iteration += 1
         # print(f"Total tokens to summarize from map step: {len(self.encoding.encode(to_be_summarized))}")
-        self.save_to_file(to_be_summarized,"summary", iteration)
+        self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
         final_summary = self.reduce_summaries(to_be_summarized)
 
-        self.save_to_file(final_summary,"final_summary", iteration)
+        self.save_to_file(final_summary, f"{fname}_final_summary", iteration)
         return final_summary, self.total_tokens_used
     
   
@@ -102,26 +103,27 @@ class MapTextSummarizer:
         print(f"Saved iteration {iteration} to file")
 
 
-model_name = "gpt-3.5-turbo"
+if __name__ == '__main__':
+    model_name = "gpt-3.5-turbo"
 
-# Create an instance of the ChatOpenAI
-llm = ChatOpenAI(
-    temperature=0,
-    openai_api_key="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",
-    model_name=model_name
-)
+    # Create an instance of the ChatOpenAI
+    llm = ChatOpenAI(
+        temperature=0,
+        openai_api_key="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",
+        model_name=model_name
+    )
 
-# Initialize the TextSummarizer with the llm instance
-summarizer = MapTextSummarizer(llm=llm, model_name=model_name)
+    # Initialize the TextSummarizer with the llm instance
+    summarizer = MapTextSummarizer(llm=llm, model_name=model_name)
 
-# The text to be summarized is passed here
-file_path = 'Gatsby.txt'
+    # The text to be summarized is passed here
+    file_path = '../Gatsby.txt'
 
-# Open the text file and read its content into a string variable
-with open(file_path, 'r', encoding='utf-8') as file:
-    book_text = file.read()
+    # Open the text file and read its content into a string variable
+    with open(file_path, 'r', encoding='utf-8') as file:
+        book_text = file.read()
 
-# Call the process method with the text
-summary, total_tokens_used = summarizer.process(book_text)
-print(summary)
-print(f"Total tokens used: {total_tokens_used}")
+    # Call the process method with the text
+    summary, total_tokens_used = summarizer.process(book_text, 'Gatsby')
+    print(summary)
+    print(f"Total tokens used: {total_tokens_used}")

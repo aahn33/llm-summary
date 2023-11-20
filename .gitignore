@@ -1,3 +1,6 @@
 rouge_scores/
 .venv/
 relevancy/
+map/
+gov-report/
+*.pyc
