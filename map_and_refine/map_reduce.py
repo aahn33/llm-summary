@@ -44,7 +44,7 @@ class MapTextSummarizer:
     def summarize_text(self, text):
         # Split text into chunks
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=3500, chunk_overlap=0
+            chunk_size=3500, chunk_overlap=0, separator='\n'
         )
         texts = text_splitter.split_text(text)
         self.save_to_file("\n-------------------------------------------------------\n".join(texts), "chunks",self.recursive_calls)
@@ -73,21 +73,22 @@ class MapTextSummarizer:
             self.total_tokens_used += cb.total_tokens
         return final_summary
 
-    def process(self, text):
+
+    def process(self, text, fname):
         to_be_summarized = text
         iteration = 0
         while len(self.encoding.encode(to_be_summarized)) > 4000:
             print("Performing the map step")
             # Before summarizing, save the current state of 'to_be_summarized' to a file
-            self.save_to_file(to_be_summarized, "summary",iteration)
+            self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
             to_be_summarized = self.summarize_text(to_be_summarized)
             self.recursive_calls += 1
             iteration += 1
         # print(f"Total tokens to summarize from map step: {len(self.encoding.encode(to_be_summarized))}")
-        self.save_to_file(to_be_summarized,"summary", iteration)
+        self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
         final_summary = self.reduce_summaries(to_be_summarized)
 
-        self.save_to_file(final_summary,"final_summary", iteration)
+        self.save_to_file(final_summary, f"{fname}_final_summary", iteration)
         return final_summary, self.total_tokens_used
     
   
