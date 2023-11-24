@@ -64,16 +64,7 @@ class RelevancyTagger:
         texts = self.split_text(text)
         results = self.prompt_llm(texts, document_title=document_title)
         relevant_chunks = self.extract_relevant_chunks(texts, results)
-        self.save_to_file(''.join(relevant_chunks), "relevant_chunks")
-
-
-    def save_to_file(self, relevant_chunks, name):
-        directory = "relevancy"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        filename = f"{name}.txt"
-        with open(os.path.join(directory, filename), 'w', encoding='utf-8') as file:
-            file.write(relevant_chunks)
+        return '\n'.join(relevant_chunks)
 
 
 if __name__ == '__main__':
@@ -84,4 +75,4 @@ if __name__ == '__main__':
     llm = ChatOpenAI(temperature=0, openai_api_key="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",
                     model_name=model_name)
     tagger = RelevancyTagger(llm, model_name, THRESHOLD, CHUNK_SIZE)
-    tagger.tag(text)
+    print(tagger.tag(text))

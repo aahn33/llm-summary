@@ -57,7 +57,7 @@ class MapRefineTextSummarizer:
         chunk_size = 3500 * self.refine_size
         print(f"Chunk size: {chunk_size}")
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=chunk_size, chunk_overlap=0
+            chunk_size=chunk_size, chunk_overlap=0, separator='\n'
         )
         texts = text_splitter.split_text(text)
         self.save_to_file("\n-------------------------------------------------------\n".join(texts), "chunks",self.recursive_calls)

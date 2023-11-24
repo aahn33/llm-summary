@@ -22,11 +22,11 @@ class MapTextSummarizer:
         )
 
         self.combine_prompt = PromptTemplate(
-            # template="""Can you create a comprehensive summary from these mini-summaries. Your output should be a couple paragraphs long. Only use the text provided to generate the summary. 
-            #             {text}
-            #          """, # For some reason, this prompt makes the model generate a summary unrelated to the input, it recognizes the book
-            template = """Write a summary of this text without listing
-                           {text}""",
+            template="""Can you create a comprehensive summary from these mini-summaries. Your output should be a couple paragraphs long. Only use the text provided to generate the summary. 
+                        {text}
+                     """, # For some reason, this prompt makes the model generate a summary unrelated to the input, it recognizes the book
+            # template = """Write a summary of this text without listing
+                        #    {text}""",
             input_variables=["text"]
         )
 
@@ -73,22 +73,21 @@ class MapTextSummarizer:
             self.total_tokens_used += cb.total_tokens
         return final_summary
 
-
-    def process(self, text, fname):
+    def process(self, text):
         to_be_summarized = text
         iteration = 0
         while len(self.encoding.encode(to_be_summarized)) > 4000:
             print("Performing the map step")
             # Before summarizing, save the current state of 'to_be_summarized' to a file
-            self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
+            self.save_to_file(to_be_summarized, "summary",iteration)
             to_be_summarized = self.summarize_text(to_be_summarized)
             self.recursive_calls += 1
             iteration += 1
         # print(f"Total tokens to summarize from map step: {len(self.encoding.encode(to_be_summarized))}")
-        self.save_to_file(to_be_summarized, f"{fname}_summary", iteration)
+        self.save_to_file(to_be_summarized,"summary", iteration)
         final_summary = self.reduce_summaries(to_be_summarized)
 
-        self.save_to_file(final_summary, f"{fname}_final_summary", iteration)
+        self.save_to_file(final_summary,"final_summary", iteration)
         return final_summary, self.total_tokens_used
     
   
