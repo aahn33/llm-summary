@@ -17,7 +17,7 @@ class MapTextSummarizer:
 
         # Setup prompts
         self.map_prompt = PromptTemplate(
-            template="""Write a summary of this text without listing. {text}""",
+            template="""Write a summary of this text without listing. Only use the text provided to generate the summary. {text}""",
             input_variables=["text"]
         )
 
@@ -83,7 +83,6 @@ class MapTextSummarizer:
             to_be_summarized = self.summarize_text(to_be_summarized)
             self.recursive_calls += 1
             iteration += 1
-        # print(f"Total tokens to summarize from map step: {len(self.encoding.encode(to_be_summarized))}")
         self.save_to_file(to_be_summarized,"summary", iteration)
         final_summary = self.reduce_summaries(to_be_summarized)
 
@@ -99,7 +98,7 @@ class MapTextSummarizer:
         filename = f"{name}_{iteration}.txt"
         with open(os.path.join(directory, filename), 'w', encoding='utf-8') as file:
             file.write(text)
-        print(f"Saved iteration {iteration} to file")
+        # print(f"Saved iteration {iteration} to file")
 
 if __name__ == '__main__':
     model_name = "gpt-3.5-turbo"

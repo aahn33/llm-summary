@@ -6,6 +6,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.callbacks import get_openai_callback
 from langchain.text_splitter import CharacterTextSplitter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class RelevancyTagger:
@@ -27,23 +28,36 @@ class RelevancyTagger:
         return texts
 
 
-    def prompt_llm(self, texts, document_title=None):
+    def tag_text(self, texts, document_title=None):
+        tags = [None] * len(texts)  # Initialize a list of the correct size with placeholders
+
+        # Use ThreadPoolExecutor to process chunks in parallel
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            # Submit all chunks to be processed
+            future_to_chunk = {executor.submit(self.tag_chunk, chunk, document_title): i for i, chunk in enumerate(texts)}
+            for future in as_completed(future_to_chunk):
+                chunk_index = future_to_chunk[future]  # Get the index of the chunk
+                print(f"Processed chunk {chunk_index}")
+                tags[chunk_index] = future.result()  # Place summary in the corresponding index
+
+        # Filter out any placeholders in case some tasks failed
+        tags = [-1 if not tag else tag for tag in tags]
+        return tags
+
+
+    def tag_chunk(self, chunk, document_title=None):
         sys_message = SystemMessage(content=(
-            "You are a knowledgeable assistant that takes in a chunk of a document and outputs a score from 0-100. "
-            "You should only output the numerical score and nothing else. "
-            f"For context, the document's title is {document_title}" if document_title else ""
+            "You are a knowledgeable assistant that takes in a chunk of a document and outputs a score from 0-100 "
+            "depending on how relevant it is to the document as a whole. "
+            "YOU SHOULD ONLY OUTPUT THE NUMERICAL SCORE AND NOTHING ELSE. DO NOT PROVIDE ANY EXPLANATION."
+            f"For context, the document's title is {document_title}. " if document_title else ""
         ))
 
-        results = []
-        for i, chunk in enumerate(texts):
-            with get_openai_callback() as cb:
-                print(f'Processing chunk {i}')
-                results.append(self.llm([sys_message, HumanMessage(content=chunk)]))
-                self.total_tokens += cb.total_tokens
-                # sleep(0.05)  # Rate limits
+        with get_openai_callback() as cb:
+            result = self.llm([sys_message, HumanMessage(content=chunk)])
+            self.total_tokens += cb.total_tokens
 
-        print(results)
-        return results
+        return result
 
 
     def extract_relevant_chunks(self, texts, results):
@@ -56,15 +70,14 @@ class RelevancyTagger:
         scores.sort(key=lambda x: x[1]) # Resort relevant chunks back into order
         relevant_chunks = [texts[idx] for _, idx in scores]
         print(f"Top {num_chunks} highest scores: {' '.join(str(score) for score, idx in scores)}")
-        print(f"Tokens used: {self.total_tokens}")
         return relevant_chunks
 
 
     def tag(self, text, document_title=None):
         texts = self.split_text(text)
-        results = self.prompt_llm(texts, document_title=document_title)
-        relevant_chunks = self.extract_relevant_chunks(texts, results)
-        return '\n'.join(relevant_chunks)
+        tags = self.tag_text(texts, document_title=document_title)
+        relevant_chunks = self.extract_relevant_chunks(texts, tags)
+        return '\n'.join(relevant_chunks), self.total_tokens
 
 
 if __name__ == '__main__':

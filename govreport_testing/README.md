@@ -4,4 +4,4 @@
 3. Run parse_crs.py to extract as many sample reports/summaries as you need into the extracted folder
 4. Some already extracted reports/summaries are provided in the extracted folder
 5. Extracted .json files will have three fields: title of the report, summary (ground truth), and the contents of the full text.
-6. testing.py shows how to test and evaluate summarization methods using this dataset
+6. See the test_*.py files on example usages

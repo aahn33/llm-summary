@@ -4,3 +4,6 @@ relevancy/
 map/
 gov-report/
 *.pyc
+__pycache__/
+extracted/
+govreport_testing/**/*.txt
