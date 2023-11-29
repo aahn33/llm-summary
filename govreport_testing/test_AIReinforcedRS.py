@@ -27,7 +27,7 @@ def save_results(results, file_path):
 model_name = "gpt-3.5-turbo"
 llm = ChatOpenAI(temperature=0, openai_api_key="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",
                 model_name=model_name, request_timeout=60)
-chunk_size = 35000
+chunk_size = 3500
 chunk_percentage = 50
 
 # Open extracted files
@@ -45,7 +45,6 @@ for file in files:
         # Get output from full text reinforced
         summarizer = Reinforced(llm=llm, chunk_size=chunk_size, chunk_percentage=chunk_percentage)
         summary, total_tokens_used = summarizer.final_run(full_text)
-
         # Perform rouge test
         scores = calculate_rouge(summary[0].content, ground_truth)
         scores['tokens_used'] = total_tokens_used
@@ -57,7 +56,7 @@ for file in files:
         # Also save the summary just in case
         basename, _ = os.path.splitext(os.path.basename(file))
         with open(Path(f'results/reinforced/summary_{basename}.txt'), 'w') as out:
-            out.write(summary)
+            out.write(summary[0].content)
 
         print(f"Results for {file} saved")
         print()
