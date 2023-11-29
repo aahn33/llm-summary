@@ -19,7 +19,7 @@ class Reinforced:
         return texts
     
     def select_percentage(self, texts):
-        num_elements = int(len(texts) * self.chunk_percentage / 100.0)
+        num_elements = int(len(texts) * self.chunk_percentage / 100.0) 
         selected_text = random.sample(list(enumerate(texts)), num_elements)
         return selected_text
     
@@ -48,11 +48,12 @@ class Reinforced:
         incomplete = None
         with get_openai_callback() as cb:
             incomplete = self.llm([sys_message_incomplete, HumanMessage(content=combined_summaries)])
+
         return incomplete
     
     def relevant_chunks_incomplete(self, summaries, incomplete, texts):
         content = incomplete.content
-        more_info = [int(num.strip()) for num in content.split(',')]
+        more_info = [(int(float(num.strip())) if num.strip().isnumeric() else -1)for num in content.split(',')]
         nearby = []
         for sum in summaries:
             nearby.append(sum[1])

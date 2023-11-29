@@ -47,7 +47,7 @@ for file in files:
         summary, total_tokens_used = summarizer.run(full_text)
 
         # Perform rouge test
-        scores = calculate_rouge(summary, ground_truth)
+        scores = calculate_rouge(summary[0].content, ground_truth)
         scores['tokens_used'] = total_tokens_used
         scores['test_file'] = file
 
