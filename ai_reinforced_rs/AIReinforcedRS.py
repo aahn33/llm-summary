@@ -11,6 +11,7 @@ class Reinforced:
         self.llm = llm
         self.chunk_size = chunk_size
         self.chunk_percentage = chunk_percentage
+        self.total_tokens_used = 0
     
     def split(self, text):
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(chunk_size=self.chunk_size, chunk_overlap=0)
@@ -18,7 +19,7 @@ class Reinforced:
         return texts
     
     def select_percentage(self, texts):
-        num_elements = int(len(texts) * self.chunk_percentage / 100.0)
+        num_elements = int(len(texts) * self.chunk_percentage / 100.0) 
         selected_text = random.sample(list(enumerate(texts)), num_elements)
         return selected_text
     
@@ -28,11 +29,10 @@ class Reinforced:
         ))
 
         summaries = []
-        tokens = 0
         for i, chunk in enumerate(selected_text):
             with get_openai_callback() as cb:
                 summaries.append((self.llm([sys_message_summary, HumanMessage(content=chunk[1])]), chunk[0])) #keep chunk index in tuple
-                tokens += cb.total_tokens
+                self.total_tokens_used += cb.total_tokens
         return summaries
     
     def incomplete_chunks(self, summaries):
@@ -48,11 +48,12 @@ class Reinforced:
         incomplete = None
         with get_openai_callback() as cb:
             incomplete = self.llm([sys_message_incomplete, HumanMessage(content=combined_summaries)])
+
         return incomplete
     
     def relevant_chunks_incomplete(self, summaries, incomplete, texts):
         content = incomplete.content
-        more_info = [int(num.strip()) for num in content.split(',')]
+        more_info = [(int(float(num.strip())) if num.strip().isnumeric() else -1)for num in content.split(',')]
         nearby = []
         for sum in summaries:
             nearby.append(sum[1])
@@ -71,11 +72,10 @@ class Reinforced:
             "Write a summary of this chunk of text that includes the main points and any important details."
         ))
         summaries_final = []
-        tokens = 0
         for i in nearby:
             with get_openai_callback() as cb:
                 summaries_final.append(self.llm([sys_message_summary, HumanMessage(content=texts[i])]))
-                tokens += cb.total_tokens
+                self.total_tokens_used += cb.total_tokens
         return summaries_final
     
     def final_run(self, text):
@@ -85,8 +85,7 @@ class Reinforced:
         incomplete = self.incomplete_chunks(summaries)
         nearby = self.relevant_chunks_incomplete(summaries, incomplete, texts)
         summaries_final = self.relevant_chunks(nearby, texts)
-        return summaries_final
-        
+        return summaries_final, self.total_tokens_used        
       
         
         
