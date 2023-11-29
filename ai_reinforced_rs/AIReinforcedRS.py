@@ -19,7 +19,7 @@ class Reinforced:
         return texts
     
     def select_percentage(self, texts):
-        num_elements = int(len(texts) * self.chunk_percentage / 100.0) 
+        num_elements = int(len(texts) * (self.chunk_percentage / 100.0)) 
         selected_text = random.sample(list(enumerate(texts)), num_elements)
         return selected_text
     
@@ -97,8 +97,8 @@ if __name__ == "__main__":
         model_name="gpt-3.5-turbo"
     )
     
-    chunk_size = 1000
-    chunk_percentage = 3
+    chunk_size = 35000
+    chunk_percentage = 50
     FILE_PATH = 'Gatsby.txt'
     f = open(FILE_PATH, encoding='utf-8')
     text = f.read()
