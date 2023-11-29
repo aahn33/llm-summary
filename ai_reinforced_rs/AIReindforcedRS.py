@@ -11,6 +11,7 @@ class Reinforced:
         self.llm = llm
         self.chunk_size = chunk_size
         self.chunk_percentage = chunk_percentage
+        self.total_tokens_used = 0
     
     def split(self, text):
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(chunk_size=self.chunk_size, chunk_overlap=0)
@@ -28,11 +29,10 @@ class Reinforced:
         ))
 
         summaries = []
-        tokens = 0
         for i, chunk in enumerate(selected_text):
             with get_openai_callback() as cb:
                 summaries.append((self.llm([sys_message_summary, HumanMessage(content=chunk[1])]), chunk[0])) #keep chunk index in tuple
-                tokens += cb.total_tokens
+                self.total_tokens_used += cb.total_tokens
         return summaries
     
     def incomplete_chunks(self, summaries):
@@ -71,11 +71,10 @@ class Reinforced:
             "Write a summary of this chunk of text that includes the main points and any important details."
         ))
         summaries_final = []
-        tokens = 0
         for i in nearby:
             with get_openai_callback() as cb:
                 summaries_final.append(self.llm([sys_message_summary, HumanMessage(content=texts[i])]))
-                tokens += cb.total_tokens
+                self.total_tokens_used += cb.total_tokens
         return summaries_final
     
     def final_run(self, text):
@@ -85,7 +84,7 @@ class Reinforced:
         incomplete = self.incomplete_chunks(summaries)
         nearby = self.relevant_chunks_incomplete(summaries, incomplete, texts)
         summaries_final = self.relevant_chunks(nearby, texts)
-        return summaries_final
+        return summaries_final, self.total_tokens_used
         
       
         
@@ -105,6 +104,6 @@ if __name__ == "__main__":
     text = f.read()
     
     reinforced = Reinforced(llm, chunk_size, chunk_percentage)
-    result = reinforced.final_run(text)
+    result, tokens = reinforced.final_run(text)
     print(result)
     
