@@ -8,7 +8,7 @@ from pathlib import Path
 from langchain.chat_models import ChatOpenAI
 from rouge import Rouge
 
-from ai_reinforced_rs.AIReindforcedRS import Reinforced
+from ai_reinforced_rs.AIReinforcedRS import Reinforced
 
 def calculate_rouge(summary, reference):
     rouge = Rouge()
@@ -44,7 +44,7 @@ for file in files:
 
         # Get output from full text reinforced
         summarizer = Reinforced(llm=llm, chunk_size=chunk_size, chunk_percentage=chunk_percentage)
-        summary, total_tokens_used = summarizer.run(full_text)
+        summary, total_tokens_used = summarizer.final_run(full_text)
 
         # Perform rouge test
         scores = calculate_rouge(summary[0].content, ground_truth)
