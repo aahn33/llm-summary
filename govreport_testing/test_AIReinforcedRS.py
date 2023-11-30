@@ -27,8 +27,16 @@ def save_results(results, file_path):
 model_name = "gpt-3.5-turbo"
 llm = ChatOpenAI(temperature=0, openai_api_key="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",
                 model_name=model_name, request_timeout=60)
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+chunk_size = 1000
+chunk_percentage = 75
+=======
+>>>>>>> Stashed changes
 chunk_size = 3500
 chunk_percentage = 50
+>>>>>>> 6000d54bd75b627865c984e15c980061dbeeb52f
 
 # Open extracted files
 files = list(Path('extracted').glob("*"))
