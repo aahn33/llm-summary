@@ -14,4 +14,5 @@ To test each of the methods using the government report dataset, navigate to the
 ## Using Each Method
 Each of the individual methods can be tested by navigating to the folder of the appropriate method and running the .py file of the method. The file_path is set to Gatsby.txt but this can be manually changed to whatever document is desired, as long as that document is added to the directory.
 
-
+## Warning
+Depending on when this code is tested, the OpenAI token might be deactivated. If so, replace the token with yours.
